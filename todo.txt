@@ -1,0 +1,4 @@
+Clean up duplicated code
+Add option for single video scraping
+Add comments to clarify murky areas
+Add to readme for setup/usage
