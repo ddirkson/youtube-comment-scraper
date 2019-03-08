@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 import os, time, argparse
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -32,6 +34,8 @@ def scroll_to_bottom_of_page(web_driver):
 		time.sleep(4)
 		scroll_height = web_driver.execute_script(get_scroll_height_command)
 
+# This shares duplicated code with the dynamic channel function. Can also be broken up
+# Why is the web driver passed into all of these functions and THEN initialized?
 def create_channel_directory_and_video_file(channel_id, web_driver):
 	# Make new directory to house correlated youtube channel files
 	if not os.path.isdir(channel_id):
@@ -63,6 +67,7 @@ def create_channel_directory_and_video_file(channel_id, web_driver):
 		if web_driver:
 			web_driver.close()
 
+# Break this into at least two functions. Probably three
 def create_dynamic_channel_directory_and_video_file(channel_id, web_driver):
 	# Make new directory to house correlated youtube channel files
 	if not os.path.isdir(channel_id):
@@ -101,6 +106,7 @@ def create_dynamic_channel_directory_and_video_file(channel_id, web_driver):
 		if web_driver:
 			web_driver.close()
 
+# Get a complete list of urls that we've already parsed
 def get_read_and_unread_video_list(channel_id):
 	url_list = []
 
@@ -114,6 +120,7 @@ def get_read_and_unread_video_list(channel_id):
 
 	return url_list
 
+# Function can be broken up. Does too many things currently
 def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 	url = None
 	url_list = []
@@ -172,6 +179,7 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 		if web_driver:
 			web_driver.close()
 
+# Do I need this function? Should probably add a main function instead
 def scrape_videos(channel_id, keyword_list, web_driver, dynamic_channel):
 	if dynamic_channel:
 		create_dynamic_channel_directory_and_video_file(channel_id, web_driver)
