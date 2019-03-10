@@ -34,30 +34,23 @@ def scroll_to_bottom_of_page(web_driver):
 		time.sleep(4)
 		scroll_height = web_driver.execute_script(get_scroll_height_command)
 
-# This shares duplicated code with the dynamic channel function. Can also be broken up
+# This shares duplicated code with the dynamic channel function
 # Why is the web driver passed into all of these functions and THEN initialized?
-def create_channel_directory_and_video_file(channel_id, web_driver):
+def create_channel_directory(channel_id):
 	# Make new directory to house correlated youtube channel files
 	if not os.path.isdir(channel_id):
 		os.makedirs(channel_id)
 
+def create_video_ids_list(channel_id, web_driver)
+	video_ids_list = []
+	print 'Hold up! Creating video ids list first...'
+
 	try:
-		web_driver = init_web_driver()
-		print 'Hold up! Creating video ids list first...'
-
-		# Open the videos page to parse all video urls
-		web_driver.get('https://www.youtube.com/user/{}/videos'.format(channel_id))
-		scroll_to_bottom_of_page(web_driver)
-
-		urls_already_found = get_read_and_unread_video_list(channel_id)
-
+		urls_already_found = get_previously_parsed_video_ids(channel_id)
 		video_ids_list = [video_element.get_attribute('href') + '\n' for video_element in web_driver.find_elements_by_xpath("//*[@id='video-title']") if (video_element.get_attribute('href') + '\n') not in urls_already_found]
 		print '{} new videos found for {}.'.format(len(video_ids_list), channel_id)
 
-		# Save off urls into videos file within the new directory
-		with open('{}/{}_videos.txt'.format(channel_id, channel_id), 'a+') as video_file:
-			video_file.writelines(video_ids_list)
-
+		return video_ids_list
 	except KeyboardInterrupt:
 		print '\nStopping! Bye.'
 	except Exception as e:
@@ -67,47 +60,27 @@ def create_channel_directory_and_video_file(channel_id, web_driver):
 		if web_driver:
 			web_driver.close()
 
-# Break this into at least two functions. Probably three
-def create_dynamic_channel_directory_and_video_file(channel_id, web_driver):
-	# Make new directory to house correlated youtube channel files
-	if not os.path.isdir(channel_id):
-		os.makedirs(channel_id)
+def create_video_file(channel_id, video_ids_list):
+	# Save off urls into videos file within the channel-specific directory
+	with open('{}/{}_videos.txt'.format(channel_id, channel_id), 'a+') as video_file:
+		video_file.writelines(video_ids_list)
 
-	try:
-		web_driver = init_web_driver()
-		print 'Hold up! Creating video ids list first...'
+def initialize_user_page_with_id(channel_id, web_driver)
+	# Open the videos page to parse all video urls
+	web_driver.get('https://www.youtube.com/user/{}/videos'.format(channel_id))
 
-		# Open the videos page to parse all video urls
-		web_driver.get('https://www.youtube.com/results?search_query={}'.format("+".join(channel_id.split(' '))))
-		time.sleep(3)
+def initialize_user_page_with_search(channel_id, web_driver)
+	# Search for the videos page to parse all video urls
+	web_driver.get('https://www.youtube.com/results?search_query={}'.format("+".join(channel_id.split(' '))))
+	time.sleep(3)
 
-		# A tenuous solution for now. Try to find the first web element that contains an href populated with a channel url
-		# It's best to try and find the exact search query value that will return the channel you want as the first result
-		channel_url = web_driver.find_element_by_xpath('//a[contains(@href, \'/channel\')]').get_attribute('href') + '/videos'
-
-		web_driver.get(channel_url)
-		scroll_to_bottom_of_page(web_driver)
-
-		urls_already_found = get_read_and_unread_video_list(channel_id)
-
-		video_ids_list = [video_element.get_attribute('href') + '\n' for video_element in web_driver.find_elements_by_xpath("//*[@id='video-title']") if (video_element.get_attribute('href') + '\n') not in urls_already_found]
-		print '{} new videos found for {}.'.format(len(video_ids_list), channel_id)
-
-		# Save off urls into videos file within the new directory
-		with open('{}/{}_videos.txt'.format(channel_id, channel_id), 'a+') as video_file:
-			video_file.writelines(video_ids_list)
-
-	except KeyboardInterrupt:
-		print '\nStopping! Bye.'
-	except Exception as e:
-		print e
-	finally:
-		# Make sure the web driver closes otherwise it keeps hogging RAM
-		if web_driver:
-			web_driver.close()
+	# A tenuous solution for now. Try to find the first web element that contains an href populated with a channel url
+	# It's best to try and find the exact search query value that will return the channel you want as the first result
+	channel_url = web_driver.find_element_by_xpath('//a[contains(@href, \'/channel\')]').get_attribute('href') + '/videos'
+	web_driver.get(channel_url)
 
 # Get a complete list of urls that we've already parsed
-def get_read_and_unread_video_list(channel_id):
+def get_previously_parsed_video_ids(channel_id):
 	url_list = []
 
 	if os.path.exists('{}/{}_videos.txt'.format(channel_id, channel_id)):
@@ -131,7 +104,6 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 	try:
 		while url_list:
 			url = url_list.pop()
-			web_driver = init_web_driver()
 			web_driver.get(url)
 
 			scroll_to_bottom_of_page(web_driver)
@@ -181,10 +153,19 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 
 # Do I need this function? Should probably add a main function instead
 def scrape_videos(channel_id, keyword_list, web_driver, dynamic_channel):
+	create_channel_directory(channel_id)
+	web_driver = init_web_driver()
+
 	if dynamic_channel:
-		create_dynamic_channel_directory_and_video_file(channel_id, web_driver)
+		initialize_user_page_with_search(channel_id, web_driver)
 	else:
-		create_channel_directory_and_video_file(channel_id, web_driver)
+		initialize_user_page_with_id(channel_id, web_driver)
+
+	# The videos page should be open now. Scroll to the bottom of it
+	scroll_to_bottom_of_page(web_driver)
+
+	video_ids_list = create_video_ids_list(channel_id, web_driver)
+	create_video_file(channel_id, video_ids_list)
 	open_videos_and_scrape(channel_id, keyword_list, web_driver)
 
 arg_parser = argparse.ArgumentParser()
