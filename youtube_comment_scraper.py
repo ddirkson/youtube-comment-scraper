@@ -95,21 +95,26 @@ def get_previously_parsed_video_ids(channel_id):
 
 # Function can be broken up. Does too many things currently
 def open_videos_and_scrape(channel_id, keyword_list, web_driver):
+	# -------------- separate function --------------
 	url = None
 	url_list = []
 	# Grab all of the unread video urls we have on file
 	with open('{}/{}_videos.txt'.format(channel_id, channel_id), 'r') as url_file:
 		url_list = url_file.readlines()
+	# -----------------------------------------------
 
 	try:
 		while url_list:
 			url = url_list.pop()
+			# should break this out into separate function so can parse single video url or loop through a list
 			web_driver.get(url)
 
 			scroll_to_bottom_of_page(web_driver)
 
+			# ----- separate function? -------
 			print 'Creating comments list...'
 			comments_list = [comment_element.text + '\n\n' for comment_element in web_driver.find_elements_by_xpath("//*[@id='content-text']")]
+			# -----------------
 
 			print 'Checking for keywords...'
 			saved_comments = []
@@ -117,10 +122,11 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 				for keyword in keyword_list:
 					# Uncomment this line if you want an explicit check for the keyword, otherwise it acts as a fuzzy search
 					# if keyword in [word for word in comment.split(' ')]:
-					if keyword in comment:
+					if keyword in str(comment).lower():
 						saved_comments.append(comment.encode('utf8'))
 						break
 
+			# ---------- maybe separate function --------------
 			# Save comments to file
 			if saved_comments:
 				print 'Writing to file!'
@@ -128,15 +134,20 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 					comment_file.write(url)
 					comment_file.writelines(saved_comments)
 					comment_file.write('--------------------------------------------\n\n')
+			# ------------------------------
 
+			# separate function ------------
 			saved_comments = []
 			# Save the new list of urls minus the one we just processed
 			with open('{}/{}_videos.txt'.format(channel_id, channel_id), 'w') as updated_url_file:
 				updated_url_file.writelines(url_list)
+			# ------------------------------
 
+			# separate function ------------
 			# Add the processed url to the read file
 			with open('{}/{}_videos_read.txt'.format(channel_id, channel_id), 'a+') as read_file:
 				read_file.write(url)
+			# ------------------------------
 
 			print 'Onto the next url.'
 			web_driver.close()
