@@ -34,8 +34,6 @@ def scroll_to_bottom_of_page(web_driver):
 		time.sleep(4)
 		scroll_height = web_driver.execute_script(get_scroll_height_command)
 
-# This shares duplicated code with the dynamic channel function
-# Why is the web driver passed into all of these functions and THEN initialized?
 def create_channel_directory(channel_id):
 	# Make new directory to house correlated youtube channel files
 	if not os.path.isdir(channel_id):
