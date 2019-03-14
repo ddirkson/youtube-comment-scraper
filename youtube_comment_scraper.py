@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-import os, time, argparse
+import os, time, argparse, socket
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
@@ -93,6 +93,14 @@ def get_previously_parsed_video_ids(channel_id):
 
 	return url_list
 
+def internet_connection():
+	try:
+		socket.create_connection(('www.youtube.com', 80), timeout=3)
+		return True
+	except:
+		pass
+	return False
+
 # Function can be broken up. Does too many things currently
 def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 	# -------------- separate function --------------
@@ -105,8 +113,12 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 
 	try:
 		while url_list:
-			url = url_list.pop()
 			# should break this out into separate function so can parse single video url or loop through a list
+			url = url_list.pop()
+
+			if not internet_connection():
+				raise Exception('Exception: No internet connection!')
+
 			web_driver.get(url)
 
 			scroll_to_bottom_of_page(web_driver)
@@ -122,7 +134,7 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 				for keyword in keyword_list:
 					# Uncomment this line if you want an explicit check for the keyword, otherwise it acts as a fuzzy search
 					# if keyword in [word for word in comment.split(' ')]:
-					if keyword in str(comment).lower():
+					if keyword in comment:
 						saved_comments.append(comment.encode('utf8'))
 						break
 
