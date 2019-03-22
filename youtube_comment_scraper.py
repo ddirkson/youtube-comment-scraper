@@ -39,7 +39,7 @@ def create_channel_directory(channel_id):
 	if not os.path.isdir(channel_id):
 		os.makedirs(channel_id)
 
-def create_video_ids_list(channel_id, web_driver)
+def create_video_ids_list(channel_id, web_driver):
 	video_ids_list = []
 	print 'Hold up! Creating video ids list first...'
 
@@ -53,7 +53,6 @@ def create_video_ids_list(channel_id, web_driver)
 		print '\nStopping! Bye.'
 	except Exception as e:
 		print e
-	finally:
 		# Make sure the web driver closes otherwise it keeps hogging RAM
 		if web_driver:
 			web_driver.close()
@@ -63,11 +62,11 @@ def create_video_file(channel_id, video_ids_list):
 	with open('{}/{}_videos.txt'.format(channel_id, channel_id), 'a+') as video_file:
 		video_file.writelines(video_ids_list)
 
-def initialize_user_page_with_id(channel_id, web_driver)
+def initialize_user_page_with_id(channel_id, web_driver):
 	# Open the videos page to parse all video urls
 	web_driver.get('https://www.youtube.com/user/{}/videos'.format(channel_id))
 
-def initialize_user_page_with_search(channel_id, web_driver)
+def initialize_user_page_with_search(channel_id, web_driver):
 	# Search for the videos page to parse all video urls
 	web_driver.get('https://www.youtube.com/results?search_query={}'.format("+".join(channel_id.split(' '))))
 	time.sleep(3)
@@ -160,8 +159,6 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 			# ------------------------------
 
 			print 'Onto the next url.'
-			web_driver.close()
-			web_driver = None
 
 	except KeyboardInterrupt:
 		print '\nStopping! Bye.'
