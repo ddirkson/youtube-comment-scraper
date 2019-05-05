@@ -1,7 +1,16 @@
 # youtube-comment-scraper
 ### A simple python script that uses selenium to scrape youtube comments
 
-- Selenium Docs: https://selenium-python.readthedocs.io/installation.html#drivers
+#### Selenium Installation:
+```
+pip install selenium
+```
+* Selenium Docs: https://selenium-python.readthedocs.io/installation.html#drivers
+#### Installing A Webdriver:
+* In order for the script to work, you'll also need to install a selenium-supported webdriver on your path
+* For now, Google's chromedriver is the only webdriver used but support for others could be added in the future
+* Chromedriver link: http://chromedriver.chromium.org/
+* Currently, the script looks for the Google chrome binary (which you also need) at this location ```/usr/bin/google-chrome``` but that could also be configurable in the future
 
 #### Current script workflow:
 * Provide a youtube channel name
