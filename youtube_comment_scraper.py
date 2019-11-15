@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import os, time, argparse, socket
 from selenium import webdriver
@@ -22,7 +22,7 @@ def scroll_to_bottom_of_page(web_driver):
 	y_position = 0
 	scroll_height = web_driver.execute_script(get_scroll_height_command)
 
-	print 'Opened url, scrolling to bottom of page...'
+	print('Opened url, scrolling to bottom of page...')
 	# While the scrollbar can still scroll further down, keep scrolling
 	# and asking for the scroll height to check again
 	while (y_position != scroll_height):
@@ -41,18 +41,18 @@ def create_channel_directory(channel_id):
 
 def create_video_ids_list(channel_id, web_driver):
 	video_ids_list = []
-	print 'Hold up! Creating video ids list first...'
+	print('Hold up! Creating video ids list first...')
 
 	try:
 		urls_already_found = get_previously_parsed_video_ids(channel_id)
 		video_ids_list = [video_element.get_attribute('href') + '\n' for video_element in web_driver.find_elements_by_xpath("//*[@id='video-title']") if (video_element.get_attribute('href') + '\n') not in urls_already_found]
-		print '{} new videos found for {}.'.format(len(video_ids_list), channel_id)
+		print('{} new videos found for {}.'.format(len(video_ids_list), channel_id))
 
 		return video_ids_list
 	except KeyboardInterrupt:
-		print '\nStopping! Bye.'
+		print('\nStopping! Bye.')
 	except Exception as e:
-		print e
+		print(e)
 		# Make sure the web driver closes otherwise it keeps hogging RAM
 		if web_driver:
 			web_driver.close()
@@ -121,11 +121,11 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 			scroll_to_bottom_of_page(web_driver)
 
 			# ----- separate function? -------
-			print 'Creating comments list...'
+			print('Creating comments list...')
 			comments_list = [comment_element.text + '\n\n' for comment_element in web_driver.find_elements_by_xpath("//*[@id='content-text']")]
 			# -----------------
 
-			print 'Checking for keywords...'
+			print('Checking for keywords...')
 			saved_comments = []
 			for comment in comments_list:
 				for keyword in keyword_list:
@@ -138,7 +138,7 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 			# ---------- maybe separate function --------------
 			# Save comments to file
 			if saved_comments:
-				print 'Writing to file!'
+				print('Writing to file!')
 				with open('{}/{}_comments.txt'.format(channel_id, channel_id), 'a+') as comment_file:
 					comment_file.write(url)
 					comment_file.writelines(saved_comments)
@@ -158,12 +158,12 @@ def open_videos_and_scrape(channel_id, keyword_list, web_driver):
 				read_file.write(url)
 			# ------------------------------
 
-			print 'Onto the next url.'
+			print('Onto the next url.')
 
 	except KeyboardInterrupt:
-		print '\nStopping! Bye.'
+		print('\nStopping! Bye.')
 	except Exception as e:
-		print e
+		print(e)
 	finally:
 		# Make sure the web driver closes otherwise it keeps hogging RAM
 		if web_driver:
@@ -200,7 +200,7 @@ web_driver = None
 if keyword_list:
 	scrape_videos(channel_id, keyword_list, web_driver, dynamic_channel)
 else:
-	print 'No keywords specified...'
+	print('No keywords specified...')
 
-print 'Finished.'
+print('Finished.')
 
